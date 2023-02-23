@@ -13,6 +13,7 @@ class DatingBot:
         self.sql_client = SQL_Client(db_config)
         self.sql_client.connect()
 
+        self.best_photos_count = 3
         self.offset = 0
 
     def get_sex_from_info(self, info):
@@ -59,6 +60,7 @@ class DatingBot:
 
                 if message == 'база':
                     text = 'Нажмите кнопку "Создать базу"'
+                    self.offset = 0
                     self.sql_client.dropdb()
                     self.vk_client.write_message_with_keyboard(user_id, text, sql_keyboard)
 
@@ -108,10 +110,13 @@ class DatingBot:
                         self.vk_client.write_message(user_id, person_info)
                         self.sql_client.insert_data_seen_users(person_id, self.offset)
 
-                        photos = self.vk_client.get_photos(person_id)
+                        photos = self.vk_client.get_photos(person_id, self.best_photos_count)
                         if not photos:
                             text = 'Фотографии недоступны'
                             self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
+                        else:
+                            self.vk_client.send_photos(user_id, photos, 'Лучшие фото:', next_keyboard)
+
                         
                     self.offset += 1
 

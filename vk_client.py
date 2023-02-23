@@ -111,7 +111,7 @@ class VK_Client:
 
         try:
             resp = requests.get(url, params=search_params)
-            print ('[INFO] request users.search method')
+            print ('[INFO] request users.search method in vk api')
         
             return resp.json()['response']
         
@@ -119,7 +119,22 @@ class VK_Client:
             print ('[ERROR] users.search method has wrong response')
             return False
         
-    def get_photos(self, owner_id):
+    def get_popular_photos(self, resp, count):
+        popular_pics = sorted(
+            resp['response']['items'],
+            key=lambda k: k['likes']['count'] if 'likes' in k.keys() else 0
+                        + k['comments']['count'] if 'comments' in k.keys() else 0,
+            reverse=True
+        )[0:count]
+        return popular_pics 
+    
+    def popular_photos_as_attachment(self, owner_id, popular_photos):
+        attachment = ''
+        for pic in popular_photos:
+            attachment += f"photo{owner_id}_{pic['id']},"
+        return attachment
+ 
+    def get_photos(self, owner_id, count):
         url = 'https://api.vk.com/method/photos.getAll'
         params = {'access_token': self.access_token,
                   'type': 'album',
@@ -128,22 +143,32 @@ class VK_Client:
                   'count': 25,
                   'v': '5.131'}
         resp = requests.get(url, params=params).json()
-        dict_photos = {}
-
+        
         try:
-            popular_pics = sorted(
-                resp['response']['items'],
-                key=lambda k: k['likes']['count'] + k['comments']['count'],
-                reverse=True
-            )[0:3]
-            for pic in popular_pics:
-                if 'owner_id' not in dict_photos.keys():
-                    dict_photos['owner_id'] = pic['owner_id']
-                    dict_photos['pics_ids'] = []
-                dict_photos['pics_ids'].append(pic['id'])
-            return dict_photos
+            print ('[INFO] request photos.getAll method in vk api')
+            popular_photos = self.get_popular_photos(resp, count)
+            print ('[INFO] sort {} most popular photos, by likes, and comments'.format(count))
+            attachment = self.popular_photos_as_attachment(owner_id, popular_photos)
+            return attachment
 
         except KeyError:
             print ('[ERROR] photos.getAll method has wrong response')
             return False
+        
+    def send_photos(self, user_id, best_photos, message, keyboard):
+
+        print(best_photos)
+
+        self.session.method("messages.send", {
+            "user_id": user_id,
+            "message": message,
+            'access_token': self.access_token,
+            'attachment': best_photos,
+            "keyboard": keyboard,                             
+            "random_id" : 0,
+        })
+
+      
+      
+    
 
