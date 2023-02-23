@@ -11,36 +11,23 @@ def get_button(text, color):
     }
 
 
-keyboard = {
-    "one_time": False,
+hallo_keyboard = {
+    "one_time": True,
     "buttons": [
-        [get_button('Начать поиск', 'primary')],
-        [get_button('Вперёд', 'secondary')]
+        [get_button('Привет!', 'primary')],
     ]
 }
-
-keyboard = json.dumps(keyboard, ensure_ascii=False).encode('utf-8')
-keyboard = str(keyboard.decode('utf-8'))
-
-request_token_keyboard = {
-    "one_time": False,
-    "buttons": [
-        [get_button('Разрешить', 'primary')],
-    ]
-}
-
-request_token_keyboard = json.dumps(request_token_keyboard, ensure_ascii=False).encode('utf-8')
-request_token_keyboard = str(request_token_keyboard.decode('utf-8'))
+hallo_keyboard = json.dumps(hallo_keyboard, ensure_ascii=False).encode('utf-8')
+hallo_keyboard = str(hallo_keyboard.decode('utf-8'))
 
 sql_keyboard = {
     "one_time": True,
     "buttons": [
-        [get_button('Создать базу', 'primary')],
+        [get_button('Познакомиться', 'primary')],
     ]
 }
-
 sql_keyboard = json.dumps(sql_keyboard, ensure_ascii=False).encode('utf-8')
-empty = str(sql_keyboard.decode('utf-8'))
+sql_keyboard = str(sql_keyboard.decode('utf-8'))
 
 next_keyboard = {
     "one_time": True,

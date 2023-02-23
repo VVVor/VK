@@ -1,7 +1,7 @@
 from vk_client import VK_Client
 from vk_api.longpoll import VkLongPoll, VkEventType
 
-from keyboard import sql_keyboard, next_keyboard
+from keyboard import hallo_keyboard, sql_keyboard, next_keyboard
 from sql_client import SQL_Client
 
 class DatingBot:
@@ -46,25 +46,17 @@ class DatingBot:
         for event in VkLongPoll(self.session).listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 user_id = event.user_id
-                message = event.text.lower() 
+                message = event.text.lower()
 
-                #self.client.sender(user_id, message)
+                print(message) 
 
-                '''
-                if message == "привет":
-                    #name = self.client.name(user_id)
-                    text = """Привет! \n Я могу познакомить тебя с кем-нибудь, но мне нужно получить от тебя некоторые разрешения. 
-                    Кликни на кнопку 'Разрешить', если хочешь продолжить.""" 
-                    self.client.write_message_with_keyboard(user_id, text, request_token_keyboard)
-                '''
-
-                if message == 'база':
-                    text = 'Нажмите кнопку "Создать базу"'
+                if message in ['привет', 'привет!', 'hallo', 'hi', 'hi!', 'знакомства', 'dating']:
+                    text = 'Я могу познакомить вас с кем-нибудь. Нажмите "Познакомиться", чтобы продолжить.'
                     self.offset = 0
                     self.sql_client.dropdb()
                     self.vk_client.write_message_with_keyboard(user_id, text, sql_keyboard)
 
-                elif message == 'создать базу':
+                elif message == 'познакомиться':
                     print('creating db...')
 
                     count = 10
@@ -88,7 +80,7 @@ class DatingBot:
                             else:
                                 continue
                         
-                        text = "Я нашел для вас {} анкеты c открытой страницей. Нажмите 'Дальше', чтобы посмотреть их.".format(open_count)
+                        text = "Я нашел для вас {} анкет c открытой страницей. Нажмите 'Дальше', чтобы посмотреть их.".format(open_count)
                         self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
 
                     else:
@@ -100,7 +92,7 @@ class DatingBot:
                     if tuple_person is None:
                         print("[Error] person tuple is none type")
                         print('offset: {}'.format(self.offset))
-                        text = 'Ошибка при загрузке анкеты'
+                        text = 'Ошибка при загрузке анкеты.'
                         self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
                         
                     else:
@@ -112,7 +104,7 @@ class DatingBot:
 
                         photos = self.vk_client.get_photos(person_id, self.best_photos_count)
                         if not photos:
-                            text = 'Фотографии недоступны'
+                            text = 'Фотографии недоступны.'
                             self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
                         else:
                             self.vk_client.send_photos(user_id, photos, 'Лучшие фото:', next_keyboard)
@@ -120,33 +112,9 @@ class DatingBot:
                         
                     self.offset += 1
 
-
-                elif message == 'база?':
-                    print("Check if 'users' TABLE exist")
-                    self.sql_client.is_users_table_exist()
-
-                elif message == 'разрешить':
-                    print("Нужно запросить auth token у пользователя")
-                
-                
-                elif message == 'имя':
-                    name = self.client.name(user_id)
-                    self.vk_client.write_message(user_id, name)
-
-                elif message == 'инфо':
-                    info = self.vk_client.get_info(user_id)
-
-                    print(info)
-
-                    sex = self.get_sex_from_info(info)
-                    name = self.get_name_from_info(info)
-                    bdate = self.get_bdate_from_info(info)
-
-                    text = "Имя: " + name
-                    text += ", пол:" + str(sex)
-                    text += ", день рождения:" + bdate                   
-
-                    self.vk_client.write_message(user_id, text)
+                else:
+                    text = 'Привет!'
+                    self.vk_client.write_message_with_keyboard(user_id, text, hallo_keyboard)
                 
 
 
