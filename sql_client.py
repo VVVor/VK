@@ -14,8 +14,6 @@ class SQL_Client:
             password=self.password, 
             database=self.database)
         self.connection.autocommit = True
-
-  
         
     def create_table_users(self):
         with self.connection.cursor() as cursor:
@@ -28,8 +26,6 @@ class SQL_Client:
                     vk_link varchar(50));"""
             )
         print("[INFO] Table USERS was created.")
-
-    
 
     def create_table_seen_users(self):
         with self.connection.cursor() as cursor:
@@ -74,6 +70,24 @@ class SQL_Client:
                     ON u.vk_id = su.vk_id
                     WHERE su.vk_id IS NULL
                     OFFSET '{offset}';"""
+            )
+            return cursor.fetchone()
+        
+    def select_user_by_id(self, offset):
+        id = offset + 1
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""SELECT u.first_name,
+                    u.last_name,
+                    u.vk_id,
+                    u.vk_link,
+                    u.id,
+                    su.vk_id
+                    FROM users AS u
+                    LEFT JOIN seen_users AS su 
+                    ON u.vk_id = su.vk_id
+                    WHERE su.vk_id IS NULL 
+                    AND u.id = {id};"""
             )
             return cursor.fetchone()
         

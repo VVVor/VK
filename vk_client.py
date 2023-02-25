@@ -77,7 +77,7 @@ class VK_Client:
         resp = response.json()['response']
         return resp    
     
-    def get_search_params(self, user_id, count):
+    def get_search_params(self, user_id, count, offset):
         request = self.domain + 'users.get'
         response = requests.get(
             request,
@@ -99,6 +99,7 @@ class VK_Client:
             'status': '1' or '6',
             'count': count,
             'v': '5.131',
+            'offset': offset,
             'access_token': self.access_token
         }
 

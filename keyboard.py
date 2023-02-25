@@ -38,3 +38,13 @@ next_keyboard = {
 
 next_keyboard = json.dumps(next_keyboard, ensure_ascii=False).encode('utf-8')
 next_keyboard = str(next_keyboard.decode('utf-8'))
+
+more_keyboard = {
+    "one_time": True,
+    "buttons": [
+        [get_button('Загрузить еще', 'primary')],
+    ]
+}
+
+more_keyboard = json.dumps(more_keyboard, ensure_ascii=False).encode('utf-8')
+more_keyboard = str(more_keyboard.decode('utf-8'))
