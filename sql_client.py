@@ -36,7 +36,7 @@ class SQL_Client:
             )
         print("[INFO] Table SEEN_USERS was created.")
 
-    def insert_data_users(self,first_name, last_name, vk_id, vk_link):
+    def insert_data_users(self, first_name, last_name, vk_id, vk_link):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""INSERT INTO users (first_name, last_name, vk_id, vk_link) 
