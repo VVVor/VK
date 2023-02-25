@@ -47,17 +47,26 @@ class SQL_Client:
         print ("[INFO] insert user with vk id:{} to table 'users'".format(vk_id))
 
     def insert_data_seen_users(self, vk_id, offset):
+        print ('insert_data_seen_users. vk_id:{}, offset:{}'.format(vk_id, offset))
         with self.connection.cursor() as cursor:
             cursor.execute(
+                f"""INSERT INTO seen_users (vk_id) 
+                VALUES ('{vk_id}')
+                ON CONFLICT (vk_id) DO NOTHING;"""
+            )
+            '''
+             cursor.execute(
                 f"""INSERT INTO seen_users (vk_id) 
                 VALUES ('{vk_id}')
                 OFFSET '{offset}'
                 ON CONFLICT (vk_id) DO NOTHING;"""
             )
+            '''
         print ("[INFO] insert user with vk id:{} to table 'seen_users'".format(vk_id))
 
 
     def select_user(self, offset):
+        print ('select_user offset:{}'.format(offset))
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""SELECT u.first_name,
@@ -71,6 +80,7 @@ class SQL_Client:
                     WHERE su.vk_id IS NULL
                     OFFSET '{offset}';"""
             )
+            print (cursor.statusmessage)
             return cursor.fetchone()
         
     def select_user_by_id(self, offset):

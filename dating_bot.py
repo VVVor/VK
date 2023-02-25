@@ -93,6 +93,46 @@ class DatingBot:
             self.vk_client.write_message(user_id, Messages.ERROR_SEARCH_PAIR) 
             
         
+    def next_pair(self, user_id):
+        print ('offset {}:'.format(self.offset))
+        tuple_person = self.get_tuple_person(self.offset)
+        if tuple_person is None:
+            if self.offset == self.total_pairs:
+                # вывести сообщение что все пары закончились и предложить загрузить еще 
+                text = 'Вы просмотрели всех кандидатов. Я могу найти новые знакомства. Нажмите "Загрузить еще" чтобы продолжить.'
+                self.vk_client.write_message_with_keyboard(user_id, 
+                                                        text, 
+                                                        more_keyboard)
+            else:
+                print("[Error] person tuple is none type")
+                print('offset: {}, total_pairs: {}'.format(self.offset, self.total_pairs))
+                self.offset += 1
+                self.next_pair(user_id)
+                
+                """self.vk_client.write_message_with_keyboard(user_id, 
+                                                        Messages.ERROR_SQL_REQUEST_PAIR, 
+                                                        next_keyboard)
+                """
+        else:
+            person_info = self.get_person_info(tuple_person)
+            person_id = self.get_person_id(tuple_person)
+
+            print('person_ifo: {}'.format(person_info))
+            print('person_id: {}'.format(person_id))
+        
+            self.vk_client.write_message(user_id, person_info)
+            self.sql_client.insert_data_seen_users(person_id, self.offset)
+
+            photos = self.vk_client.get_photos(person_id, self.best_photos_count)
+            if not photos:
+                text = Messages.PHOTOS_NOT_AVAILABLE
+                self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
+            else:
+                self.vk_client.send_photos(user_id, photos, Messages.BEST_PHOTOS, next_keyboard)
+
+            
+        self.offset += 1
+
 
     def listen(self):
         self.longpoll = VkLongPoll(self.session)
@@ -114,44 +154,9 @@ class DatingBot:
                     self.sql_client.createdb()
                     self.search_pair(user_id)            
                                  
-
                 elif message == Messages.NEXT_PAIR:
-                    print ('offset {}:'.format(self.offset))
-                    tuple_person = self.get_tuple_person(self.offset)
-                    if tuple_person is None:
-                        if self.offset == self.total_pairs:
-                            # вывести сообщение что все пары закончились и предложить загрузить еще 
-                            text = 'Вы просмотрели всех кандидатов. Я могу найти новые знакомства. Нажмите "Загрузить еще" чтобы продолжить.'
-                            self.vk_client.write_message_with_keyboard(user_id, 
-                                                                   text, 
-                                                                   more_keyboard)
-                        else:
-                            print("[Error] person tuple is none type")
-                            print('offset: {}, total_pairs: {}'.format(self.offset, self.total_pairs))
-                            self.vk_client.write_message_with_keyboard(user_id, 
-                                                                   Messages.ERROR_SQL_REQUEST_PAIR, 
-                                                                   next_keyboard)
-                        
-                    else:
-                        person_info = self.get_person_info(tuple_person)
-                        person_id = self.get_person_id(tuple_person)
-
-                        print('person_ifo: {}'.format(person_info))
-                        print('person_id: {}'.format(person_id))
-                    
-                        self.vk_client.write_message(user_id, person_info)
-                        self.sql_client.insert_data_seen_users(person_id, self.offset)
-
-                        photos = self.vk_client.get_photos(person_id, self.best_photos_count)
-                        if not photos:
-                            text = Messages.PHOTOS_NOT_AVAILABLE
-                            self.vk_client.write_message_with_keyboard(user_id, text, next_keyboard)
-                        else:
-                            self.vk_client.send_photos(user_id, photos, Messages.BEST_PHOTOS, next_keyboard)
-
-                        
-                    self.offset += 1
-
+                    self.next_pair(user_id)
+                  
                 elif message == 'загрузить еще':
                     #text = 'следующий шаг'
                     #self.vk_client.write_message(user_id, text)
